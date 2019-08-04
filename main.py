@@ -21,29 +21,12 @@ def classify(root):
 
 
 def build(tk_path, tk_bins):
-    # check if path is valid
     dir_path = tk_path.get()
-    if not os.path.isdir(dir_path):
-        tkMessageBox.showerror("Naive Bayes Classifier", "Path is not a folder")
-        return
-
-    # check if number of bins is valid
     try:
         bins = int(tk_bins.get())
-        if bins <= 0:
-            tkMessageBox.showerror("Naive Bayes Classifier", "Number must be positive")
-            return
     except:
-        tkMessageBox.showerror("Naive Bayes Classifier", "Number of bins is not an integer")
         return
 
-    # go throw the folder given to check if all the files exist
-    file_list = []
-    for file_name in os.listdir(dir_path):
-        file_list.append(file_name)
-    if not 'train.csv' in file_list or 'test.csv' not in file_list or 'Structure.txt' not in file_list:
-        tkMessageBox.showerror("Error", "One or more files are missing from the given folder")
-        return
     global model
     try:
         # build the model
@@ -51,6 +34,43 @@ def build(tk_path, tk_bins):
         tkMessageBox.showinfo("Information", "Building classifier using train-set is done!")
     except:
         tkMessageBox.showerror("Error", "Something went wrong, please try again")
+
+
+def check_bins(tk_bins):
+    # check if number of bins is valid
+    try:
+        bins = int(tk_bins.get())
+        if bins <= 0:
+            return False
+    except:
+        return False
+    return True
+
+
+def check_input(btn_build, tk_path, tk_bins, check_type):
+    # check if path is valid
+    dir_path = tk_path.get()
+    bool_dir = os.path.isdir(dir_path)
+    bool_bins = check_bins(tk_bins)
+    btn_build.config(state='disabled')
+    if not bool_dir:
+        if check_type == 'f':
+            tkMessageBox.showerror("Naive Bayes Classifier", "Path is not a folder")
+        return
+
+    # go throw the folder given to check if all the files exist
+    file_list = []
+    for file_name in os.listdir(dir_path):
+        file_list.append(file_name)
+    if 'train.csv' not in file_list or 'test.csv' not in file_list or 'Structure.txt' not in file_list:
+        if check_type == 'f':
+            tkMessageBox.showerror("Naive Bayes Classifier", "One or more files are missing from the given folder")
+        return
+    if not bool_bins:
+        if check_type == 'b':
+            tkMessageBox.showerror("Naive Bayes Classifier", "Number is not an integer")
+        return
+    btn_build.config(state='normal')
 
 
 def browse(tk_path_entry):
@@ -77,22 +97,27 @@ def build_window(root):
     lbl_dis_bins = Label(main_frame, text="Discretization Bins: ")
     lbl_dis_bins.grid(row=1, column=0)
 
+    # Buttons
+    btn_browse = Button(main_frame, text='Browse', command=lambda: browse(dir_path))
+    btn_browse.grid(row=0, column=2, padx=3)
+
+    btn_build = Button(main_frame, text='Build', command=lambda: build(dir_path, dis_bins), width=20)
+    btn_build.configure(state=DISABLED)
+    btn_build.grid(row=2, column=1, pady=30)
+
+    btn_classify = Button(main_frame, text='Classify', command=lambda: classify(root), width=20)
+    btn_classify.grid(row=3, column=1)
+
+    # add listeners
+    dir_path.trace("w", lambda name, index, mode, sv=dir_path: check_input(btn_build, dir_path, dis_bins,'f'))
+    dis_bins.trace("w", lambda name, index, mode, sv=dis_bins: check_input(btn_build, dir_path, dis_bins,'b'))
+
     # Entries
     entry_dir_path = Entry(main_frame, width=50, textvariable=dir_path)
     entry_dir_path.grid(row=0, column=1)
 
     entry_dis_bins = Entry(main_frame, width=15, textvariable=dis_bins)
     entry_dis_bins.grid(sticky='W', row=1, column=1)
-
-    # Buttons
-    btn_browse = Button(main_frame, text='Browse', command=lambda: browse(dir_path))
-    btn_browse.grid(row=0, column=2, padx=3)
-
-    btn_build = Button(main_frame, text='Build', command=lambda: build(dir_path, dis_bins), width=20)
-    btn_build.grid(row=2, column=1, pady=30)
-
-    btn_classify = Button(main_frame, text='Classify', command=lambda: classify(root), width=20)
-    btn_classify.grid(row=3, column=1)
 
 
 def main():
