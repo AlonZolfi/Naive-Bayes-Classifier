@@ -4,6 +4,9 @@ import tkMessageBox
 from Tkinter import *
 from model import *
 
+bool_path = False
+bool_bin = False
+
 
 def classify(root):
     try:
@@ -52,10 +55,13 @@ def check_input(btn_build, tk_path, tk_bins, check_type):
     dir_path = tk_path.get()
     bool_dir = os.path.isdir(dir_path)
     bool_bins = check_bins(tk_bins)
+    global bool_path
+    global bool_bin
     btn_build.config(state='disabled')
     if not bool_dir:
-        if check_type == 'f':
+        if check_type == 'f' and not bool_path:
             tkMessageBox.showerror("Naive Bayes Classifier", "Path is not a folder")
+            bool_path = True
         return
 
     # go throw the folder given to check if all the files exist
@@ -63,13 +69,17 @@ def check_input(btn_build, tk_path, tk_bins, check_type):
     for file_name in os.listdir(dir_path):
         file_list.append(file_name)
     if 'train.csv' not in file_list or 'test.csv' not in file_list or 'Structure.txt' not in file_list:
-        if check_type == 'f':
+        if check_type == 'f' and not bool_path:
             tkMessageBox.showerror("Naive Bayes Classifier", "One or more files are missing from the given folder")
+            bool_path = True
         return
+    bool_path = False
     if not bool_bins:
-        if check_type == 'b':
+        if check_type == 'b' and not bool_bin:
             tkMessageBox.showerror("Naive Bayes Classifier", "Number is not an integer")
+            bool_bin = True
         return
+    bool_bin = False
     btn_build.config(state='normal')
 
 
@@ -128,3 +138,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
