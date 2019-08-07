@@ -85,7 +85,11 @@ class NaiveBayesModel:
         nc = self.train_df[((self.train_df[col_name] == row_val) & (self.train_df['class'] == class_val))].count()[0]
         # number of appearances of the class_val
         n = self.train_df['class'].value_counts()[class_val]
-        p = 1.0 / len(self.data_structure[col_name].split(","))  # uniform distribution of class
+        if self.data_structure[col_name] == 'NUMERIC':
+            mechane = self.num_of_bins
+        else:
+            mechane = len(self.data_structure[col_name].split(","))
+        p = 1.0 / mechane  # uniform distribution of class
         m = 2  # m-estimator
         m_estimate = (nc + m*p) / (n + m)
         return m_estimate
