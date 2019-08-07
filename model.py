@@ -16,8 +16,8 @@ class NaiveBayesModel:
 
     def get_struct_data(self):
         struct_data = {}  # {column name: type,.. }
-        with open(self.dir_path+"/Structure.txt","r") as struct_file:
-            #get all lines from file
+        with open(self.dir_path+"/Structure.txt", "r") as struct_file:
+            # get all lines from file
             struct_lines = struct_file.readlines()
             for line in struct_lines:
                 if line.__contains__('{'):  # in case of non numeric data
@@ -32,8 +32,8 @@ class NaiveBayesModel:
         for column in self.data_structure:  # for each column fill data
             column_val = self.data_structure[column]
             if column_val == 'NUMERIC':  # if data is numeric fill with mean
-                data_frame[column].fillna(round((data_frame[column].mean()),3), inplace=True)
-            else: # if data is not numeric fill with mode
+                data_frame[column].fillna((data_frame[column].mean()), inplace=True)
+            else:  # if data is not numeric fill with mode
                 data_frame[column].fillna((data_frame[column].mode()[0]), inplace=True)
 
     def discretization_to_bins(self, data_frame):
@@ -78,14 +78,14 @@ class NaiveBayesModel:
                 # get the max posterior
                 str_res = class_values[np.argmax(prob)]
                 # write it to the output file
-                output_file.write(str(index + 1) + " " + str_res+"\n")
+                output_file.write(str(index + 1) + " " + str_res + "\n")
 
     def calc_prob_feature(self, col_name, row_val, class_val):
         # number of rows where col_name = row_val and class = class_val
         nc = self.train_df[((self.train_df[col_name] == row_val) & (self.train_df['class'] == class_val))].count()[0]
         # number of appearances of the class_val
         n = self.train_df['class'].value_counts()[class_val]
-        p = 0.5  # uniform distribution of class
+        p = 1.0 / len(self.data_structure[col_name].split(","))  # uniform distribution of class
         m = 2  # m-estimator
         m_estimate = (nc + m*p) / (n + m)
         return m_estimate
