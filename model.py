@@ -32,7 +32,7 @@ class NaiveBayesModel:
         for column in self.data_structure:  # for each column fill data
             column_val = self.data_structure[column]
             if column_val == 'NUMERIC':  # if data is numeric fill with mean
-                data_frame[column].fillna((data_frame[column].mean()), inplace=True)
+                data_frame[column] = data_frame.groupby('class')[column].apply(lambda x: x.fillna(x.mean()))
             else:  # if data is not numeric fill with mode
                 data_frame[column].fillna((data_frame[column].mode()[0]), inplace=True)
 
